@@ -1,9 +1,39 @@
 import { PrismaClient } from "@prisma/client";
+import * as bcrypt from 'bcrypt';
+import { roundsOfHashing } from '../src/users/users.service'; 
 
 const prisma = new PrismaClient();
 
 // create dummy articles
 async function main() {
+
+  const passwordDennis = await bcrypt.hash('supersecret', roundsOfHashing);
+  const passwordElon = await bcrypt.hash('supersecret', roundsOfHashing);
+
+  const user1 = await prisma.user.upsert({
+    where: { email: 'dennis@gmail.com' },
+    update: {
+      password: passwordDennis,
+    },
+    create: {
+      email: 'dennis@gmail.com',
+      name: 'Dennis Black',
+      password: passwordElon,
+    },
+  });
+  
+  const user2 = await prisma.user.upsert({
+    where: { email: 'elon@tesla.com' },
+    update: {
+      password: passwordElon,
+    },
+    create: {
+      email: 'elon@tesla.com',
+      name: 'Elon Musk',
+      password: passwordElon,
+    },
+  });
+
     const post1 = await prisma.article.upsert({
       where: { title: 'Prisma Adds Support for MongoDB' },
       update: {},
@@ -25,6 +55,8 @@ async function main() {
         published: true,
       },
     });
+
+    console.log(user1, user2, post1, post2);
   }
   
   main()
